@@ -10,7 +10,7 @@ class APIConfig:
         # config.read(cur_dir + "\\config.ini")
         self.___config = configparser.ConfigParser()
         if config_path is None:
-            self.___config.read("config.ini")
+            self.___config.read("config.cfg")
         else:
             self.___config.read(config_path)
 
@@ -30,7 +30,7 @@ class APIConfig:
     def get_value(self, value: str):
         """Get an arbitrary value from the config file"""
         if value in self.___config:
-            return self.__config['value']
+            return self.__config[value]
         else:
             return None
 

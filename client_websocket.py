@@ -1,4 +1,4 @@
-from .auth import APIAuth
+from auth import APIAuth
 import json
 import time
 import websocket

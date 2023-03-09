@@ -1,6 +1,6 @@
 # Aretas API Client Libary
 
-This is a (currently) "barebones" (compared to all the available endpoints) framework for intereacting with the Aretas REST API in python
+This is a (currently) "barebones" (compared to all the available endpoints) framework for interacting with the Aretas REST API in python
 
 All classes in the API take an instantiated APIAuth class
 
@@ -23,8 +23,22 @@ What's implemented so far:
 - Sensor Type metadata mapping
 - Ultra simple sensor data streaming (websockets) - all you do is provide a location and macs to watch and a callback
 - Auth token mgmnt
+- Basic data posting to the API
 
-You must also have at least the following barebones config file:
+### Config ###
+
+You will normally need a file called ``config.ini`` somewhere in your working directory path
+
+The root config object ``config = APIConfig()`` will look for config.ini in the local path
+If it doesn't exist there, you can supply a path ``config = APIConfig('path/to/file/config.ini')``
+
+There are many ways to manage the API token that we don't cover here. 
+What IS provided is an automatic way to acquire a token and use it in the various modules. I
+f the token expires, YMMV depending on how the class implements token refresh and 401 handling.
+
+There is an example in ``sensor_data_ingest.py`` that demonstrates how to refresh or reaquire a token automatically after expiry in the method called ``send_datum_auth_check``
+
+A barebones config file should contain:
 
     [DEFAULT]
     API_URL = https://iot.aretas.ca/rest/
@@ -35,14 +49,15 @@ You must also have at least the following barebones config file:
 
 Basic instantiation and usage of the API:
 
-    import sys
-    sys.path.append('X:\\path\\to\\working\\dir\\')
-    print(sys.path)
+    # if you have the module installed somewhere weird, you can use this to add it to the path
+    # import sys
+    # sys.path.append('X:\\path\\to\\working\\dir\\')
+    # print(sys.path)
 
-    from aretasapiclient.api_config import *
-    from aretasapiclient.sensor_data_query import *
-    from aretasapiclient.auth import *
-    from aretasapiclient.aretas_client import *
+    from api_config import *
+    from sensor_data_query import *
+    from auth import *
+    from aretas_client import *
     
     # instantiate an APIConfig class (pass in an optional configuration file)
     config = APIConfig()

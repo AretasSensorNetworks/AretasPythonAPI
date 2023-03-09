@@ -1,7 +1,7 @@
-from .auth import APIAuth
+from auth import APIAuth
 import requests
 import json
-from .utils import Utils as AUtils
+from utils import Utils as AUtils
 
 
 class APIClient:

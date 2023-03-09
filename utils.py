@@ -1,8 +1,9 @@
 import time
 import datetime
 
-from .sensor_type_info import APISensorTypeInfo
+from sensor_type_info import APISensorTypeInfo
 import pandas as pd
+
 
 class Utils:
     def __init__(self):

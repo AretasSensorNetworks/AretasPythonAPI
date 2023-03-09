@@ -1,18 +1,13 @@
 import sys
-sys.path.append('C:\\Users\\aretas\\Documents\\GitHub\\APIExamples\\python\\')
-print(sys.path)
 
-from aretasapiclient.api_config import *
-from aretasapiclient.sensor_data_query import *
-from aretasapiclient.auth import *
-from aretasapiclient.aretas_client import *
-from aretasapiclient.data_classifier import DataClassifierCRUD
-from aretasapiclient.labelled_data_query import LabelledDataQuery
-from aretasapiclient.sensor_type_info import *
+from auth import *
+from aretas_client import *
+from data_classifier import DataClassifierCRUD
+from labelled_data_query import LabelledDataQuery
+from sensor_type_info import *
 
 import pandas as pd
 from sklearn.utils import shuffle
-
 
 config = APIConfig()
 auth = APIAuth(config)
