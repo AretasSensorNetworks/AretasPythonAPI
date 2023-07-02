@@ -86,3 +86,46 @@ class LabelledDataQuery:
         else:
             print("Bad response code: " + str(response.status_code))
             return None
+
+    @staticmethod
+    def reshape_dataset(dataset: dict, can_cols: list):
+        """
+        We are building a list of rows for pandas, numpy, etc. however, we need to account for missing values
+        As such, we should either discard the datum or let pandas/numpy fill it in for us
+        the canonical definition of 'what columns belong in the rows' should be defined beforehand
+        """
+        count = 0
+        data = []
+        for datum in dataset:
+            row = []
+            timestamp = datum['key']
+            row.append(int(timestamp))
+            for sensor_type in can_cols:
+                data_dict_keyset = [int(i) for i in datum['value'].keys()]
+                if sensor_type in data_dict_keyset:
+                    data_value = float(datum['value'][str(sensor_type)])
+                else:
+                    data_value = float("NaN")
+
+                count += 1
+                row.append(data_value)
+
+            data.append(row)
+
+        return data
+
+    @staticmethod
+    def get_columns(dataset: dict) -> list:
+        """
+        get the distinct columns from the dataset to use for indexing
+        (these columns will be passed to reshape_dataset)
+        """
+        cols = set[int]()
+        for datum in dataset:
+            dict_data = datum['value']
+            sensor_types = [int(i) for i in dict_data.keys()]
+            for k in sensor_types:
+                cols.add(k)
+
+        return sorted(cols)
+

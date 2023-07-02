@@ -1,7 +1,4 @@
 import time
-# import sys
-# sys.path.append('C:\\Users\\aretas\\Documents\\GitHub\\APIExamples\\python\\')
-# print(sys.path)
 
 from auth import *
 from aretas_client import *

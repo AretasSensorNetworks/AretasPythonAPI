@@ -80,7 +80,7 @@ for mac in active_macs:
 
         sensor_data_map[mac][sensor_type] = {
             "data": datum['data'],
-            "timestmap": datum['timestamp']
+            "timestamp": datum['timestamp']
         }
 
 print(sensor_data_map)
