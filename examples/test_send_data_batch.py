@@ -4,7 +4,6 @@ from auth import APIAuth
 from sensor_data_ingest import SensorDataIngest
 from utils import Utils
 
-
 if __name__ == "__main__":
 
     config = APIConfig('./config.ini')
@@ -18,7 +17,7 @@ if __name__ == "__main__":
         now_ms = Utils.now_ms()
         dataset.append(
             {
-                "mac":888,
+                "mac": 888,
                 'type': i,
                 'data': 0.00,
                 'timestamp': now_ms
@@ -26,5 +25,3 @@ if __name__ == "__main__":
         )
 
     api_send.send_data(dataset)
-
-

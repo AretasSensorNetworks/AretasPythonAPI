@@ -24,6 +24,8 @@ class SensorDataIngest:
     def send_datum_auth_check(self, datum: dict, overwritetimestamp: bool = True, n_retries: int = 2) -> bool:
         """
         Send a datum using automatic auth token refresh
+        This method is a bit overkill since we can just pass in 'refresh_if_expired'
+        into the get_token method
         """
         ts = AUtils.now_ms()
 
@@ -45,7 +47,7 @@ class SensorDataIngest:
         req = PreparedRequest()
         req.prepare_url(url, params)
 
-        auth_token = self.api_auth.get_token()
+        auth_token = self.api_auth.get_token(refresh_if_expired=True)
         if auth_token is None:
             """
             This isn't ideal, but we'll let it slide for now until we decide what to do when a user has provided
@@ -111,12 +113,13 @@ class SensorDataIngest:
             self.logger.error("Invalid response code:{0}".format(response.status_code))
             return False
 
-    def send_data(self, data: list[dict]) -> bool:
+    def send_data(self, data: list[dict], auth_check = False) -> bool:
         """
         Send several sensor data readings to the API (batch method)
 
         :param data: a list of dicts where each dict must be in the form of:
         { 'mac': 1234, 'type': 123, 'data': 0.00, 'timestamp': 1234567 }
+        :param auth_check: whether to perform an authentication check to ensure we have a valid token
         :return: True if success, False if otherwise
         """
         now_ts = AUtils.now_ms()
@@ -134,8 +137,10 @@ class SensorDataIngest:
                 'timestamp': int(datum['timestamp'])
             })
 
+        auth_token = self.api_auth.get_token(refresh_if_expired=auth_check)
+
         headers = {
-            "Authorization": "Bearer " + self.api_auth.get_token(),
+            "Authorization": "Bearer " + auth_token,
             'Content-type': 'application/json'
         }
         # note that batch endpoint is always secured
