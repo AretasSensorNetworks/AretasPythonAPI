@@ -24,4 +24,5 @@ if __name__ == "__main__":
             }
         )
 
-    api_send.send_data(dataset)
+    # enable auth_check for long-running services that don't reinitialize the auth object and get a valid token
+    api_send.send_data(dataset, auth_check=False)
