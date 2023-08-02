@@ -6,6 +6,10 @@ import json
 
 class SensorDataQuery:
 
+    """
+    Use this class for querying historical sensor data from the API
+    There are many additional options for these queries, so see the function docs
+    """
     def __init__(self, api_auth: APIAuth):
         self.api_auth = api_auth
 

@@ -26,7 +26,7 @@ class LabelledDataQuery:
                           max_time_align_diff: int = 100000,
                           ):
         """Get the column ordered labelled data from the API for this classifier id.
-         :param classifier_id - classifierId the classifier ID
+         :param classifier_id - classifierId the classifier ID (UUID from the BO Object)
          :param restrict_types - restrictTypes whether or not to restrict the returned data to the types specified in the classifier definition
          :param down_sample - downsample - whether or not to downsample the data
          :param threshold - threshold - the threshold for downsampling (essentially the number of records to downsample to)

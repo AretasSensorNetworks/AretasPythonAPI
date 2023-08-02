@@ -1,5 +1,3 @@
-import sys
-
 from auth import *
 from aretas_client import *
 from data_classifier import DataClassifierCRUD
@@ -8,6 +6,10 @@ from sensor_type_info import *
 
 import pandas as pd
 from sklearn.utils import shuffle
+
+"""
+This example shows how to fetch labelled data from the API
+"""
 
 config = APIConfig()
 auth = APIAuth(config)
