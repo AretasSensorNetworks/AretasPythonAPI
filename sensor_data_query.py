@@ -5,11 +5,11 @@ import json
 
 
 class SensorDataQuery:
-
     """
     Use this class for querying historical sensor data from the API
     There are many additional options for these queries, so see the function docs
     """
+
     def __init__(self, api_auth: APIAuth):
         self.api_auth = api_auth
 
@@ -82,7 +82,7 @@ class SensorDataQuery:
         }
 
         if len(types) > 0:
-            params['types'] = types
+            params['type'] = types
 
         if down_sample:
             params['downsample'] = down_sample
@@ -145,3 +145,17 @@ class SensorDataQuery:
 
     def print_config(self):
         print(self.api_auth.api_config.get_api_url())
+
+    def reshape_by_type(self, raw_sensor_data: list[dict]) -> dict[int, list[dict[int, float]]]:
+        """
+        Reshape a standard query response into a type indexed dict
+        """
+        sensor_data_reshaped = dict[int, list[dict[int, float]]]()
+        for datum in raw_sensor_data:
+            if datum['type'] not in sensor_data_reshaped:
+                sensor_data_reshaped[datum['type']] = list[dict[int, float]]()
+            sensor_data_reshaped[datum['type']].append({
+                'timestamp': datum['timestamp'], 'data': datum['data']
+            })
+
+        return sensor_data_reshaped

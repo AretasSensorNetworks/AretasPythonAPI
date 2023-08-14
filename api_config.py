@@ -28,9 +28,16 @@ class APIConfig:
         return self._API_PASSWORD
 
     def get_value(self, value: str):
-        """Get an arbitrary value from the config file"""
-        if value in self.___config:
-            return self.__config[value]
-        else:
-            return None
+        """Get an arbitrary value from the config file
+            Search all sections and return the first version of the value
+        """
+        sections = ["DEFAULT"]
+        for section in self.___config.sections():
+            sections.append(section)
+
+        for section in sections:
+            ret = self.___config.get(section, value)
+            if ret is not None:
+                break
+        return ret
 
