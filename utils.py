@@ -18,6 +18,18 @@ class Utils:
         return int(time.time() * 1000)
 
     @staticmethod
+    def fn_date_conv(x):
+        """
+        This allows you to convert a datetime string into a unix epoch timestamp
+        for querying Aretas backend
+        Note that everything is converted based on your local TZ
+        :param x:
+        :return: unix epoch timestamp
+        """
+        dt = datetime.datetime.strptime(x, '%m/%d/%Y %H:%M:%S')
+        return int(dt.timestamp() * 1000)
+
+    @staticmethod
     def convert_ts(ts):
         """
         Convert a unix timestamp in milliseconds to a timestamp string (UTC)
