@@ -63,7 +63,7 @@ class SensorDataIngest:
 
             json_response = json.loads(response.content.decode())
             self.logger.info("API Response:{0}".format(json_response))
-            return True
+            return json_response['booleanResponse']
 
         elif (response.status_code == 401 or response.status_code == 403) and (n_retries > 0):
             self.logger.info("Response [{}], refreshing authtoken".format(response.status_code))
@@ -107,7 +107,7 @@ class SensorDataIngest:
 
             json_response = json.loads(response.content.decode())
             self.logger.info("API Response:{0}".format(json_response))
-            return True
+            return json_response['booleanResponse']
 
         else:
             self.logger.error("Invalid response code:{0}".format(response.status_code))
@@ -155,7 +155,8 @@ class SensorDataIngest:
 
             json_response = json.loads(response.content.decode())
             self.logger.info("API Response:{0}".format(json_response))
-            return True
+
+            return json_response['booleanResponse']
 
         else:
             self.logger.error("Invalid response code:{0}".format(response.status_code))
