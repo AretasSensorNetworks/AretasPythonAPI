@@ -1,3 +1,5 @@
+import logging
+
 from auth import APIAuth
 import requests
 import json
@@ -6,11 +8,13 @@ from utils import Utils as AUtils
 
 class APIClient:
     """Various methods for Client BO stuff"""
+
     def __init__(self, api_auth: APIAuth):
         self.api_auth = api_auth
         self._client_location_view = None
+        self.logger = logging.getLogger(__name__)
 
-    def get_client_location_view(self, invalidate_cache = False):
+    def get_client_location_view(self, invalidate_cache=False):
         """Get a list of all the locations, sensorlocations, buildingmaps and macs for this account
         :return:
         """
@@ -25,7 +29,7 @@ class APIClient:
             self._client_location_view = json.loads(response.content.decode())
             return self._client_location_view
         else:
-            print("Bad response code: " + str(response.status_code))
+            self.logger.warning("Bad response code: " + str(response.status_code))
             return None
 
     def get_active_locations(self):
@@ -39,7 +43,7 @@ class APIClient:
         active_devices = []
         for loc in active_locs:
             for device in loc['sensorList']:
-                if(now - device['lastReportTime']) < duration:
+                if (now - device['lastReportTime']) < duration:
                     active_devices.append(device)
 
         return active_devices
@@ -63,4 +67,3 @@ class APIClient:
                     return device
 
         return None
-

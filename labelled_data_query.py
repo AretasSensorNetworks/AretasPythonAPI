@@ -1,3 +1,5 @@
+import logging
+
 from auth import APIAuth
 import requests
 from requests import PreparedRequest
@@ -10,6 +12,7 @@ class LabelledDataQuery:
     """
     def __init__(self, api_auth: APIAuth):
         self.api_auth = api_auth
+        self.logger = logging.getLogger(__name__)
 
     def get_labelled_data(self, classifier_id: str,
                           restrict_types: bool = True,
@@ -25,16 +28,17 @@ class LabelledDataQuery:
                           record_limit: int = 100000000,
                           max_time_align_diff: int = 100000,
                           ):
-        """Get the column ordered labelled data from the API for this classifier id.
+        """
+        Get the column ordered labelled data from the API for this classifier id.
          :param classifier_id - classifierId the classifier ID (UUID from the BO Object)
-         :param restrict_types - restrictTypes whether or not to restrict the returned data to the types specified in the classifier definition
-         :param down_sample - downsample - whether or not to downsample the data
+         :param restrict_types - restrictTypes whether to restrict the returned data to the types specified in the classifier definition
+         :param down_sample - downsample - whether to downsample the data
          :param threshold - threshold - the threshold for downsampling (essentially the number of records to downsample to)
-         :param moving_average - movingAverage - whether or not to enable moving average
+         :param moving_average - movingAverage - whether to enable moving average
          :param window_size - windowSize - the moving average window size
          :param moving_average_type - movingAverageType - the type of moving average (see API docs)
          :param iq_range - iqRange - the interquartile range for interquartile filtering. -1 disables (API default)
-         :param interpolate_data - interpolateData - whether or not to interpolate the data
+         :param interpolate_data - interpolateData - whether to interpolate the data
          :param interpolate_timestep - interpolateTimestep - the interpolation timestep
          :param interpolate_type - interpolateType - the interpolation type (0 = Akima, 1 = Linear, etc)
          :param record_limit - recordLimit - specify the record limit for the query (API defaults are very large)
@@ -84,7 +88,7 @@ class LabelledDataQuery:
             response_content = json.loads(response.content.decode())
             return response_content
         else:
-            print("Bad response code: " + str(response.status_code))
+            self.logger.warning("Bad response code: " + str(response.status_code))
             return None
 
     @staticmethod

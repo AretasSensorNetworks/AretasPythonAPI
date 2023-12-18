@@ -24,10 +24,7 @@ class SensorDataWebsocket:
         self.message_callback = message_callback
         self._target_location_id = target_location_id
         self._target_macs = target_macs
-        format_ = "%(asctime)s: %(message)s"
-        logging.basicConfig(format=format_,
-                            level=logging.INFO,
-                            datefmt="%H:%M:%S")
+        self.logger = logging.getLogger(__name__)
         self._ws_trace_enable = ws_trace_enable
 
         self._ws_ping_thread_run = False;
@@ -35,7 +32,7 @@ class SensorDataWebsocket:
     def ws_run(self, *args):
         # run it async so we don't block other processing
         self.ws.run_forever()
-        logging.info("ws_run forever thread terminating")
+        self.logger.info("ws_run forever thread terminating")
 
     def ws_run_ping(self):
         # in order to keep the web socket from closing, we need to ping it
@@ -44,7 +41,7 @@ class SensorDataWebsocket:
                 return
             time.sleep(10)
             self.ws.send("PING")
-        logging.info("ws_run_ping terminating")
+        self.logger.info("ws_run_ping terminating")
 
     def start(self):
         # url = self.api_auth.api_config.get_api_url() + "sensordata/byrange"
@@ -78,10 +75,10 @@ class SensorDataWebsocket:
         self.ws_ping_thread = x
 
     def on_error(self, ws, error):
-        logging.error("WS Error: {}".format(error))
+        self.logger.error("WS Error: {}".format(error))
 
     def on_close(self, ws, close_status_code, close_msg):
-        logging.info("Web socket closed")
+        self.logger.info("Web socket closed")
 
     def on_message(self, ws, message):
         # print(message)
@@ -92,7 +89,7 @@ class SensorDataWebsocket:
             for datum in data:
                 if 'type' in datum:
                     if self._ws_trace_enable:
-                        logging.info("Received sensor data message:")
+                        self.logger.info("Received sensor data message:")
                     self.message_callback(datum)
 
     def stop(self):

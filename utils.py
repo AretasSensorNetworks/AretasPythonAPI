@@ -5,9 +5,38 @@ from sensor_type_info import APISensorTypeInfo
 import pandas as pd
 
 
+class WebServiceBoolean:
+    """
+    The contract for the WebServiceBoolean from the API
+    """
+
+    def __init__(self, boolean_response: bool = None, message: str = None):
+        self.boolean_response = boolean_response
+        self.message = message
+
+    def __repr__(self):
+        return "Response: {} Message: {}".format(self.get_boolean_response(), self.get_message())
+
+    def set_boolean_response(self, boolean_response: bool):
+        self.boolean_response = boolean_response
+
+    def get_boolean_response(self) -> bool:
+        return self.boolean_response
+
+    def set_message(self, message: str):
+        self.message = message
+
+    def get_message(self) -> str:
+        return self.message
+
+
 class Utils:
     def __init__(self):
         pass
+
+    @staticmethod
+    def unmarshall_webservice_bool(json_dict: dict) -> WebServiceBoolean:
+        return WebServiceBoolean(bool(json_dict['booleanResponse']), json_dict['message'])
 
     @staticmethod
     def now_ms():
@@ -65,7 +94,7 @@ class Utils:
         return True
 
     @staticmethod
-    def is_aligned(data, max_timestamp_diff:int = 30000):
+    def is_aligned(data, max_timestamp_diff: int = 30000):
         """ensure that all of the datums in the dict are within max_timestamp_diff of one another"""
         timestamps = []
         for sensor_type in data:
@@ -135,7 +164,7 @@ class Utils:
         timestamp_acc = 0
         for sensor_type in data:
             timestamp_acc += data[sensor_type]['timestamp']
-        timestamp_avg = int(timestamp_acc/len(data))
+        timestamp_avg = int(timestamp_acc / len(data))
 
         # the data comes out of the API sorted by key (sensortype) ascending
         sorted_data = dict(sorted(data.items()))
@@ -153,5 +182,3 @@ class Utils:
         df_datum = pd.DataFrame([sensor_data], columns=sensor_labels)
 
         return df_datum
-
-

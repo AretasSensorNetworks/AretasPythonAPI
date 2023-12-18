@@ -1,3 +1,5 @@
+import logging
+
 from auth import APIAuth
 import requests
 import json
@@ -6,6 +8,7 @@ import json
 class APICache:
     def __init__(self, api_auth: APIAuth):
         self.api_auth = api_auth
+        self.logger = logging.getLogger(__name__)
 
     def get_latest_data(self, macs: list):
 
@@ -26,9 +29,7 @@ class APICache:
             return json_response
 
         else:
-            print("Invalid response code:")
-            print(response.status_code)
-            print('\n')
+            self.logger.warning("Invalid response code:".format(response.status_code))
             return None
 
 

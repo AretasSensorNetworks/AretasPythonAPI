@@ -1,3 +1,5 @@
+import logging
+
 from auth import APIAuth
 import requests
 from requests.models import PreparedRequest
@@ -12,6 +14,7 @@ class SensorDataQuery:
 
     def __init__(self, api_auth: APIAuth):
         self.api_auth = api_auth
+        self.logger = logging.getLogger(__name__)
 
     def refresh_token(self):
         """Refresh the API token"""
@@ -107,9 +110,11 @@ class SensorDataQuery:
 
         req = PreparedRequest()
         req.prepare_url(url, params)
-        print(req.url)
+        self.logger.info("Request URL:".format(req.url))
 
-        headers = {"Authorization": "Bearer " + self.api_auth.get_token(), "X-AIR-Token": str(mac)}
+        headers = {
+            "Authorization": "Bearer {}".format(self.api_auth.get_token()),
+            "X-AIR-Token": str(mac)}
 
         response = requests.get(req.url, headers=headers)
 
@@ -138,9 +143,7 @@ class SensorDataQuery:
             return sensor_data
 
         else:
-            print("Invalid response code:")
-            print(response.status_code)
-            print('\n')
+            self.logger.warning("Invalid response code:{}".format(response.status_code))
             return None
 
     def print_config(self):
