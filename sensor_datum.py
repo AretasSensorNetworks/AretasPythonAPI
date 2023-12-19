@@ -38,4 +38,4 @@ class SensorDatum:
         self.__data = data
 
     def get_data(self)->float:
-        return self.get_data()
+        return self.__data

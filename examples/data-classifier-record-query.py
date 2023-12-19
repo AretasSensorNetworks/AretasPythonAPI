@@ -43,7 +43,7 @@ class DataClassifierRecordQueryTest:
                 down_sample=False
             )
 
-            if len(ret) > 0:
+            if len(record_data) > 0:
                 ret[mac] = record_data
 
         return ret
@@ -65,7 +65,7 @@ class DataClassifierRecordQueryTest:
 
         record_sample = record_list[0]
 
-        record_data = self.fetch_classified_data(record_sample)
+        record_data = self.fetch_classifier_record_data(record_sample)
 
         
 
