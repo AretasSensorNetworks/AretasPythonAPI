@@ -5,6 +5,8 @@ import requests
 from requests.models import PreparedRequest
 import json
 
+from sensor_datum import SensorDatum
+
 
 class SensorDataQuery:
     """
@@ -37,7 +39,7 @@ class SensorDataQuery:
                  interpolate_data: bool = False,
                  interpolate_timestep: int = 120000,
                  interpolate_type: int = 0
-                 ):
+                 ) -> list[SensorDatum]:
         """
         This is the main sensor data query end point, most other data query
         endpoints are rarely used or may ultimately be deprecated
@@ -131,14 +133,15 @@ class SensorDataQuery:
             mac_rcvd = int(response.headers['X-AIR-Token'])
 
             for sensorDatum in json_response:
-                datum = {
-                    'mac': mac_rcvd,
-                    'type': sensorDatum.get('type'),
-                    'timestamp': sensorDatum.get('timestamp'),
-                    'data': sensorDatum.get('data')
-                }
 
-                sensor_data.append(datum)
+                sensor_data.append(
+                    SensorDatum(
+                        mac_rcvd,
+                        sensorDatum.get('type'),
+                        sensorDatum.get('timestamp'),
+                        sensorDatum.get('data')
+                    )
+                )
 
             return sensor_data
 
