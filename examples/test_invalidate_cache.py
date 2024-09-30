@@ -12,4 +12,4 @@ config = APIConfig()
 auth = APIAuth(config)
 client = APIClient(auth)
 
-client_location_view = client.get_client_location_view(invalidate_cache=True)
+client_location_view: ClientLocationView = client.get_client_location_view(invalidate_cache=True)

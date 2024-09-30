@@ -1,33 +1,9 @@
 import time
 import datetime
 
+from entities import WebServiceBoolean
 from sensor_type_info import APISensorTypeInfo
 import pandas as pd
-
-
-class WebServiceBoolean:
-    """
-    The contract for the WebServiceBoolean from the API
-    """
-
-    def __init__(self, boolean_response: bool = None, message: str = None):
-        self.boolean_response = boolean_response
-        self.message = message
-
-    def __repr__(self):
-        return "Response: {} Message: {}".format(self.get_boolean_response(), self.get_message())
-
-    def set_boolean_response(self, boolean_response: bool):
-        self.boolean_response = boolean_response
-
-    def get_boolean_response(self) -> bool:
-        return self.boolean_response
-
-    def set_message(self, message: str):
-        self.message = message
-
-    def get_message(self) -> str:
-        return self.message
 
 
 class Utils:

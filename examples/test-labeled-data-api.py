@@ -3,15 +3,16 @@ from aretas_client import *
 from data_classifier import DataClassifierCRUD, DataClassifier
 from labelled_data_query import LabelledDataQuery
 from sensor_type_info import *
-
 import pandas as pd
-from sklearn.utils import shuffle
+import os
+
+os.chdir('../')
 
 """
 This example shows how to fetch labelled data from the API
 """
 
-config = APIConfig('../config.ini')
+config = APIConfig('config.ini')
 auth = APIAuth(config)
 client = APIClient(auth)
 
@@ -19,11 +20,11 @@ client = APIClient(auth)
 sensor_type_info = APISensorTypeInfo(auth)
 
 # even if we don't need it right away, it's good practice to fetch the client location view
-client_location_view = client.get_client_location_view()
+client_location_view: ClientLocationView = client.get_client_location_view()
 
 data_classifier_crud = DataClassifierCRUD(auth)
 labelled_data_query = LabelledDataQuery(auth)
-my_data_classifiers:list[DataClassifier] = data_classifier_crud.list()
+my_data_classifiers: list[DataClassifier] = data_classifier_crud.list()
 
 for data_classifier in my_data_classifiers:
     print("Description: {0} Label: {1} Id: {2}".format(
@@ -93,9 +94,5 @@ print(df_not_occupied.head(3))
 
 full_ds = pd.concat([df_occupied, df_not_occupied])
 
-full_ds = shuffle(full_ds)
+full_ds = full_ds.sample(frac=1, random_state=2401).reset_index(drop=True)
 print(full_ds.head(10))
-
-
-
-

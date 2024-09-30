@@ -2,10 +2,12 @@ from auth import *
 from aretas_client import *
 from data_classifier import DataClassifierCRUD
 from data_classifier_record import DataClassifierRecord, DataClassifierRecordCRUD
+from entities import SensorDatum
 from sensor_data_query import SensorDataQuery
-from sensor_datum import SensorDatum
 from sensor_type_info import *
-from matplotlib import pyplot as plt
+import os
+
+os.chdir("../")
 
 
 class DataClassifierRecordQueryTest:
@@ -13,15 +15,15 @@ class DataClassifierRecordQueryTest:
         """
         we want to fetch the dataclassifier records for a label then query the data
         """
-        self.config = APIConfig('../config.ini')
+        self.config = APIConfig('config.ini')
         self.auth = APIAuth(self.config)
         self.client = APIClient(self.auth)
 
         # we will almost always need the sensortypeinfo class
-        sensor_type_info = APISensorTypeInfo(self.auth)
+        self.sensor_type_info = APISensorTypeInfo(self.auth)
 
         # even if we don't need it right away, it's good practice to fetch the client location view
-        self.client_location_view = self.client.get_client_location_view()
+        self.client_location_view: ClientLocationView = self.client.get_client_location_view()
 
         self.data_classifier_crud = DataClassifierCRUD(self.auth)
         self.data_classifier_record_crud = DataClassifierRecordCRUD(self.auth)
@@ -61,13 +63,13 @@ class DataClassifierRecordQueryTest:
 
         # test listing by data classifier id
         record_list: list[DataClassifierRecord] = self.data_classifier_record_crud.get_by_id(classifier_id)
-        [print(record) for record in record_list]
+
+        if record_list:
+            [print(record) for record in record_list]
 
         record_sample = record_list[0]
 
         record_data = self.fetch_classifier_record_data(record_sample)
-
-        
 
 
 if __name__ == "__main__":

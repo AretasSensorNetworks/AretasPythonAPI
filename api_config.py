@@ -31,6 +31,7 @@ class APIConfig:
         """Get an arbitrary value from the config file
             Search all sections and return the first version of the value
         """
+        ret = None
         sections = ["DEFAULT"]
         for section in self.___config.sections():
             sections.append(section)

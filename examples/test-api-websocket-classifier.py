@@ -10,6 +10,9 @@ from client_websocket import SensorDataWebsocket
 
 import pandas as pd
 
+import os
+os.chdir('../')
+
 """
 This is a template for the type of workflow you need for multivariate sensor data classifiers
 
@@ -25,7 +28,7 @@ client = APIClient(auth)
 sensor_type_info = APISensorTypeInfo(auth)
 
 # even if we don't need it right away, it's good practice to fetch the client location view
-client_location_view = client.get_client_location_view()
+client_location_view: ClientLocationView = client.get_client_location_view()
 
 data_classifier_crud = DataClassifierCRUD(auth)
 labelled_data_query = LabelledDataQuery(auth)
@@ -65,7 +68,6 @@ df_devices = pd.DataFrame(active_devices)
 
 # unless you use the area usage hints and building map features in your model, it's probably best to drop them
 df_devices.drop(["areaUsageHints", "buildingMapId"], axis=1, inplace=True)
-df_devices[:len(df_devices)]
 
 """
 
@@ -102,7 +104,6 @@ def process_message(sensor_datum):
     # if the ingest_sensor_data dict now has all of our required data and is time_aligned
     # we get the single row data frame and call the prediction (depending on what the model expects for input)
     if AUtils.is_full_and_aligned(tmp):
-
         # get the dataframe then massage it
         df_datum = AUtils.get_datum_df(tmp, sensor_type_info)
         do_predict_one(df_datum)

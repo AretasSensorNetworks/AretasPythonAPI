@@ -1,11 +1,10 @@
 import logging
-
 from auth import APIAuth
 import requests
 from requests.models import PreparedRequest
 import json
 
-from sensor_datum import SensorDatum
+from entities import SensorDatum, SensorDataByType, SensorBit
 
 
 class SensorDataQuery:
@@ -133,7 +132,6 @@ class SensorDataQuery:
             mac_rcvd = int(response.headers['X-AIR-Token'])
 
             for sensorDatum in json_response:
-
                 sensor_data.append(
                     SensorDatum(
                         mac_rcvd,
@@ -152,16 +150,21 @@ class SensorDataQuery:
     def print_config(self):
         print(self.api_auth.api_config.get_api_url())
 
-    def reshape_by_type(self, raw_sensor_data: list[dict]) -> dict[int, list[dict[int, float]]]:
+    @staticmethod
+    def reshape_by_type(raw_sensor_data: list[dict]) -> dict[int, SensorDataByType]:
         """
         Reshape a standard query response into a type indexed dict
         """
-        sensor_data_reshaped = dict[int, list[dict[int, float]]]()
+        sensor_data_reshaped = dict[int, SensorDataByType]()
+
         for datum in raw_sensor_data:
-            if datum['type'] not in sensor_data_reshaped:
-                sensor_data_reshaped[datum['type']] = list[dict[int, float]]()
-            sensor_data_reshaped[datum['type']].append({
-                'timestamp': datum['timestamp'], 'data': datum['data']
-            })
+            sensor_type = int(datum['type'])
+            if sensor_type not in sensor_data_reshaped:
+                sensor_data_by_type = SensorDataByType(sensor_type=sensor_type, sensor_data=list())
+                sensor_data_reshaped[sensor_type] = sensor_data_by_type
+
+            sensor_data_reshaped[sensor_type].sensor_data.append(
+                SensorBit(timestamp=datum['timestamp'], data=datum['data'])
+            )
 
         return sensor_data_reshaped

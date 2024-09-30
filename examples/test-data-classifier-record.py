@@ -7,12 +7,15 @@ from data_classifier import DataClassifierCRUD
 from data_classifier_record import DataClassifierRecord, DataClassifierRecordCRUD
 from sensor_type_info import *
 from utils import Utils as AretasUtils, WebServiceBoolean
+import os
+
+os.chdir('../')
 
 """
 Test the various functions for the dataclassifier record service
 """
 
-config = APIConfig('../config.ini')
+config = APIConfig('config.ini')
 auth = APIAuth(config)
 client = APIClient(auth)
 
@@ -20,7 +23,7 @@ client = APIClient(auth)
 sensor_type_info = APISensorTypeInfo(auth)
 
 # even if we don't need it right away, it's good practice to fetch the client location view
-client_location_view = client.get_client_location_view()
+client_location_view:ClientLocationView = client.get_client_location_view()
 
 data_classifier_crud = DataClassifierCRUD(auth)
 data_classifier_record_crud = DataClassifierRecordCRUD(auth)

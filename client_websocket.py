@@ -41,6 +41,7 @@ class SensorDataWebsocket:
                 return
             time.sleep(10)
             self.ws.send("PING")
+
         self.logger.info("ws_run_ping terminating")
 
     def start(self):
@@ -71,7 +72,7 @@ class SensorDataWebsocket:
 
         x = threading.Thread(target=self.ws_run_ping, args=())
         x.start()
-        # in case we ned to access the thread
+        # in case we need to access the thread
         self.ws_ping_thread = x
 
     def on_error(self, ws, error):

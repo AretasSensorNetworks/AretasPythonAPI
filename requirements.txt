@@ -1,6 +1,8 @@
-requests~=2.28.1
-pandas~=1.5.2
-sklearn~=0.0.post1
-websocket-client~=1.5.1
-scikit-learn~=1.2.2
-urllib3~=1.26.13
+requests
+pandas
+websocket-client
+matplotlib
+pillow
+urllib3
+pydantic
+plotly
