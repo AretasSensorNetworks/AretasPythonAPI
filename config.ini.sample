@@ -1,4 +1,4 @@
-[DEFAULT]
+[ARETAS]
 API_URL=https://iot.aretas.ca/rest/
 
 API_USERNAME = username

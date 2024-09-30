@@ -40,7 +40,7 @@ There is an example in ``sensor_data_ingest.py`` that demonstrates how to refres
 
 A barebones config file should contain:
 
-    [DEFAULT]
+    [ARETAS]
     API_URL = https://iot.aretas.ca/rest/
 
     API_USERNAME = username
@@ -65,11 +65,11 @@ Basic instantiation and usage of the API:
     auth = APIAuth(config)
     # lets view the client view for our account (shows all the locations, devices, building maps, etc)
     client = APIClient(auth)
-    client_location_view = client.get_client_location_view()
+    client_location_view :ClientLocationView = client.get_client_location_view()
 
-    my_client_id = client_location_view['id']
-    all_macs = client_location_view['allMacs']
-    my_devices_and_locations = client_location_view['locationSensorViews']
+    my_client_id = client_location_view.id
+    all_macs = client_location_view.allMacs
+    my_devices_and_locations = client_location_view.locationSensorViews
 
     for obj in my_devices_and_locations:
         print(obj)

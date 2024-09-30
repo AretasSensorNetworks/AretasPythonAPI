@@ -14,9 +14,9 @@ class APIConfig:
         else:
             self.___config.read(config_path)
 
-        self._API_URL = self.___config['DEFAULT']['API_URL']
-        self._API_USERNAME = self.___config['DEFAULT']['API_USERNAME']
-        self._API_PASSWORD = self.___config['DEFAULT']['API_PASSWORD']
+        self._API_URL = self.___config['ARETAS']['API_URL']
+        self._API_USERNAME = self.___config['ARETAS']['API_USERNAME']
+        self._API_PASSWORD = self.___config['ARETAS']['API_PASSWORD']
 
     def get_api_url(self):
         return self._API_URL
@@ -32,7 +32,7 @@ class APIConfig:
             Search all sections and return the first version of the value
         """
         ret = None
-        sections = ["DEFAULT"]
+        sections = ["ARETAS"]
         for section in self.___config.sections():
             sections.append(section)
 
