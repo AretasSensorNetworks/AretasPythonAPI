@@ -91,6 +91,7 @@ print(mac, location_id)
 
 
 def do_predict_one(data_df):
+    # stub for a fake classifier
     print(data_df.head(1))
     pass
 

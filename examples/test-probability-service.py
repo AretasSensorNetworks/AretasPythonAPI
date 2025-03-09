@@ -18,7 +18,7 @@ auth = APIAuth(config)
 client = APIClient(auth)
 sdq = SensorDataQuery(auth)
 
-client_location_view:ClientLocationView = client.get_client_location_view()
+client_location_view: ClientLocationView = client.get_client_location_view()
 
 my_client_id = client_location_view.id
 all_macs = client_location_view.allMacs

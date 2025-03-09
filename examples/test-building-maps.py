@@ -47,7 +47,7 @@ def test_get_map_image():
 
     client_location_view: ClientLocationView = client.get_client_location_view()
 
-    location_view :LocationSensorView = client.get_random_location_with_building_map()
+    location_view: LocationSensorView = client.get_random_location_with_building_map()
 
     location_id = location_view.location.id
     map_id = location_view.buildingMapList[0].id

@@ -1,7 +1,7 @@
 from auth import *
 from aretas_client import *
 from api_cache import APICache
-
+from sensor_type_info import APISensorTypeInfo
 import os
 
 os.chdir("../")
@@ -34,6 +34,8 @@ auth = APIAuth(config)
 client = APIClient(auth)
 
 client_location_view: ClientLocationView = client.get_client_location_view()
+
+sensor_type_info = APISensorTypeInfo(auth)
 
 my_client_id = client_location_view.id
 all_macs = client_location_view.allMacs
@@ -87,4 +89,12 @@ for mac in active_macs:
             "timestamp": datum['timestamp']
         }
 
-print(sensor_data_map)
+print(sensor_data_map.keys())
+
+unique_types = set()
+for key in sensor_data_map.keys():
+    [unique_types.add(stype) for stype in sensor_data_map[key].keys()]
+
+print(unique_types)
+
+# print(sensor_data_map)
