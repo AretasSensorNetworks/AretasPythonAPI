@@ -69,4 +69,20 @@ if histogram:
 else:
     print("Failed to retrieve histogram.")
 
-# get the probability of an event occurring
+# Calculate the probability of specific sensor data events occurring using the fetched histogram
+sensor_data_values = [21.0, 30.0, 11.2]  # Example sensor data values
+probabilities = []
+
+if histogram:
+    for value in sensor_data_values:
+        # Find the bin that the value falls into
+        for bin in histogram.bins:
+            if bin.min <= value < bin.max:
+                probabilities.append(bin.probability)
+                break
+        else:
+            probabilities.append(0.0)  # If no bin is found, probability is 0
+
+    print("Calculated probabilities for the given sensor data:", probabilities)
+else:
+    print("Failed to retrieve histogram.")
