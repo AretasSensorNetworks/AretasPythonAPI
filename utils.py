@@ -12,7 +12,7 @@ class Utils:
 
     @staticmethod
     def unmarshall_webservice_bool(json_dict: dict) -> WebServiceBoolean:
-        return WebServiceBoolean(bool(json_dict['booleanResponse']), json_dict['message'])
+        return WebServiceBoolean(bool(json_dict['booleanResponse']), json_dict.get('message', None))
 
     @staticmethod
     def now_ms():
