@@ -4,14 +4,18 @@ from pydantic import BaseModel
 
 
 class AlertHistoryRecord(BaseModel):
+    eventId: int
     mac: int
     timestamp: int
-    type: int
-    data: float
-    alertId: str
-    isActive: bool
-    eventId: int
     rtnTimestamp: int
+    sensorType: int
+    sensorData: float
+    alertId: str
+    monitorLocation: Optional[str] = None
+    monitorDescription: Optional[str] = None
+    isNew: bool
+    isDismissed: bool
+    isResolved: bool
 
 
 class Alert(BaseModel):
