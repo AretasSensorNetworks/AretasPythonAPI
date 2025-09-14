@@ -1,6 +1,8 @@
-from auth import *
-from aretas_client import *
+from api_config import APIConfig
+from aretas_client import APIClient
 from api_cache import APICache
+from auth import APIAuth
+from entities import ClientLocationView
 from sensor_type_info import APISensorTypeInfo
 import os
 
