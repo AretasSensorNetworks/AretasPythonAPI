@@ -1,0 +1,34 @@
+# Assist Button drill: a pendant wearer walks to a room and presses the
+# button (twice — the second press lands mid-trigger-window and is
+# physically impossible for the tag to emit, proving the dedupe path);
+# a second press happens later from the corridor. One unregistered badge
+# blinks throughout to exercise the discovery path.
+#
+#   python -m aretas_ble_sim.run_sim --scenario aretas_ble_sim/samples/assist-drill.scenario.yaml
+name: assist-drill
+building: hotel-small.building.json
+seed: 7
+epochMs: 1770000000000
+durationS: 300
+ownerClientId: sim-client
+tags:
+  - mac: "CC:11:00:00:00:11"
+    profile: bc011
+    tagType: PANIC
+    label: "Sim pendant 1"
+    kind: personnel
+    start: f0-r02
+    path: [f0-r05]
+    speedMps: 1.0
+    dwellS: 120
+    presses:
+      - {atS: 90, kind: single_click}
+      - {atS: 95, kind: single_click}    # mid-window: dropped by the tag
+      - {atS: 220, kind: double_click}
+  - mac: "CC:11:00:00:00:12"
+    profile: bc011
+    tagType: PERSONNEL
+    label: "Unregistered badge"
+    kind: personnel
+    start: f1-r01
+    registered: false                    # ingest drops it -> discovery list

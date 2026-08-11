@@ -1,0 +1,72 @@
+# The visual-demo tour: four personnel badges walking distinct routes across
+# both floors (staggered speeds and dwells so the plan never looks scripted),
+# a parked asset cart, and an assist pendant being worn on rounds — no presses;
+# assist-drill is the scenario for that. Wall-clock epoch: this one exists to
+# be WATCHED live on the tracking page, not replayed.
+#
+#   python -m aretas_ble_sim.provision --scenario aretas_ble_sim/samples/demo-tour.scenario.yaml --config config.ini
+#   python -m aretas_ble_sim.run_sim   --scenario aretas_ble_sim/samples/demo-tour.scenario.yaml --config config.ini --transport mqtt
+name: demo-tour
+building: hotel-small.building.json
+seed: 11
+epochMs: null
+durationS: 1800
+ownerClientId: sim-client
+tags:
+  - mac: "CC:11:00:00:00:21"
+    profile: bc011
+    tagType: PERSONNEL
+    label: "Badge — A. Okafor"
+    kind: personnel
+    start: f0-r01
+    path: [f0-r04, f0-r07, f0-r01]
+    speedMps: 1.2
+    dwellS: 45
+    loop: true
+  - mac: "CC:11:00:00:00:22"
+    profile: bc011
+    tagType: PERSONNEL
+    label: "Badge — M. Tremblay"
+    kind: personnel
+    start: f0-r06
+    path: [f1-r03, f1-r07, f0-r06]
+    speedMps: 1.0
+    dwellS: 75
+    loop: true
+  - mac: "CC:11:00:00:00:23"
+    profile: bc011
+    tagType: PERSONNEL
+    label: "Badge — S. Nguyen"
+    kind: personnel
+    start: f1-r05
+    path: [f1-r01, f0-r03, f1-r05]
+    speedMps: 1.4
+    dwellS: 30
+    loop: true
+  - mac: "CC:11:00:00:00:24"
+    profile: bc011
+    tagType: PERSONNEL
+    label: "Badge — K. Fontaine"
+    kind: personnel
+    start: f0-r08
+    path: [f0-r02, f1-r06, f0-r08]
+    speedMps: 0.9
+    dwellS: 90
+    loop: true
+  - mac: "CC:11:00:00:00:25"
+    profile: bc011
+    tagType: PANIC
+    label: "Pendant — E. Rossi"
+    kind: personnel
+    start: f0-r05
+    path: [f0-r05, f1-r08]
+    speedMps: 0.8
+    dwellS: 180
+    loop: true
+  - mac: "CC:11:00:00:00:26"
+    profile: ruuvi_raw2
+    tagType: ASSET
+    label: "Med cart 2"
+    kind: asset
+    start: f1-r02
+    battery: {startPct: 88, decayPctPerHour: 0.4}

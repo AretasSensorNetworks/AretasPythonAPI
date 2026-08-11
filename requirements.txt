@@ -6,3 +6,7 @@ pillow
 urllib3
 pydantic
 plotly
+paho-mqtt>=2.0
+pika
+PyYAML
+pytest

@@ -781,3 +781,44 @@ Other notable models:
 | `WebServiceBoolean` | Standard API response wrapper (`boolean_response: bool`, `message: str`) |
 
 Most dataclasses support `from_dict(d)` factory methods and `to_dict()` serialization.
+
+## BLE Tag Simulator — `aretas_ble_sim`
+
+A hardware-free simulator for the Aretas BLE tag / asset-tracking / Assist Button
+subsystem. It models a virtual building (rooms, walls, floors, receiver
+placements), scripted tag actors (walking personnel, parked assets, button
+presses), and an indoor RF propagation model, then emits **real wire payloads**
+exactly as receiver hardware would — sighting batches and prioritized tag
+events.
+
+```bash
+# generate a sample building (JSON + floor-plan PNGs)
+python -m aretas_ble_sim.building_gen --out-dir aretas_ble_sim/samples
+
+# free-run a scenario and record a deterministic "golden trace"
+python -m aretas_ble_sim.run_sim --scenario aretas_ble_sim/samples/walkthrough.scenario.yaml
+
+# provision everything the scenario needs (location + receiver devices + tags,
+# idempotent), then drive the live MQTT ingest in real time
+python -m aretas_ble_sim.provision --scenario ... --config config.cfg
+python -m aretas_ble_sim.run_sim --scenario ... --transport mqtt --config config.cfg
+
+# CI assertion mode: score what the platform saw, JSON report + exit code
+python -m aretas_ble_sim.run_sim --scenario ... --transport mqtt --score report.json
+```
+
+Highlights:
+
+- **Deterministic**: same scenario + seed + epoch produce byte-identical
+  traces (`trace.jsonl` + ground-truth `truth.jsonl` + `manifest.json`) —
+  usable as regression fixtures for localization code.
+- **Faithful edge behavior**: per-tag advertising cadences and trigger-burst
+  semantics of real beacon models (Blue Charm BC011, RuuviTag RAWv2),
+  receiver-side rate capping, batching, burst-to-event collapse, and
+  journal/retransmit-until-acked event delivery.
+- **Physical RF model**: log-distance path loss, per-wall/per-slab
+  attenuation, per-advertising-channel stationary fading, per-receiver bias,
+  reception-probability vs RSSI, and tag barometry for floor detection.
+- Tests: `pytest aretas_ble_sim/tests`.
+
+See `aretas_ble_sim/__init__.py` and the sample scenario YAMLs for details.

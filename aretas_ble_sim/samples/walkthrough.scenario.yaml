@@ -1,0 +1,29 @@
+# A person walks the ground floor, visits a room upstairs, comes back.
+# An asset cart sits parked in a first-floor room (RuuviTag: seq + baro).
+# Deterministic: fixed seed + epochMs -> byte-identical golden traces.
+#
+#   python -m aretas_ble_sim.run_sim --scenario aretas_ble_sim/samples/walkthrough.scenario.yaml
+name: walkthrough
+building: hotel-small.building.json
+seed: 42
+epochMs: 1770000000000        # fixed for reproducibility; null = wall clock
+durationS: 600
+ownerClientId: sim-client
+tags:
+  - mac: "CC:11:00:00:00:01"
+    profile: bc011
+    tagType: PERSONNEL
+    label: "Sim badge 1"
+    kind: personnel
+    start: f0-r01
+    path: [f0-r03, f1-r02, f0-r01]
+    speedMps: 1.2
+    dwellS: 60
+    loop: true
+  - mac: "CC:11:00:00:00:02"
+    profile: ruuvi_raw2
+    tagType: ASSET
+    label: "Sim cart 1"
+    kind: asset
+    start: f1-r04
+    battery: {startPct: 93, decayPctPerHour: 0.4}

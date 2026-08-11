@@ -1,0 +1,75 @@
+# Calibration burn-in: six badges walking varied loops through every part
+# of the building. Receiver-bias self-calibration needs POSITIONAL
+# DIVERSITY — co-sighting residuals only average away wall attenuation when
+# tags approach receiver pairs from many geometries (a static tag repeating
+# one geometry bakes its wall profile into the estimate instead).
+# Deterministic: fixed seed + epochMs -> byte-identical golden traces.
+#
+#   python -m aretas_ble_sim.run_sim --scenario aretas_ble_sim/samples/calibration-burnin.scenario.yaml
+name: calibration-burnin
+building: hotel-small.building.json
+seed: 99
+epochMs: 1770000000000        # fixed for reproducibility; null = wall clock
+durationS: 900
+ownerClientId: sim-client
+tags:
+  - mac: "CC:11:00:00:01:01"
+    profile: bc011
+    tagType: PERSONNEL
+    label: "Calib badge 1"
+    kind: personnel
+    start: f0-r01
+    path: [f0-r05, f0-r08, f0-r02]
+    speedMps: 1.2
+    dwellS: 20
+    loop: true
+  - mac: "CC:11:00:00:01:02"
+    profile: bc011
+    tagType: PERSONNEL
+    label: "Calib badge 2"
+    kind: personnel
+    start: f0-r04
+    path: [f1-r01, f1-r05, f0-r06]
+    speedMps: 1.3
+    dwellS: 15
+    loop: true
+  - mac: "CC:11:00:00:01:03"
+    profile: bc011
+    tagType: PERSONNEL
+    label: "Calib badge 3"
+    kind: personnel
+    start: f1-r02
+    path: [f1-r08, f0-r03, f1-r04]
+    speedMps: 1.2
+    dwellS: 20
+    loop: true
+  - mac: "CC:11:00:00:01:04"
+    profile: bc011
+    tagType: PERSONNEL
+    label: "Calib badge 4"
+    kind: personnel
+    start: f0-r07
+    path: [f0-r02, f1-r06, f1-r03]
+    speedMps: 1.4
+    dwellS: 15
+    loop: true
+  - mac: "CC:11:00:00:01:05"
+    profile: bc011
+    tagType: PERSONNEL
+    label: "Calib badge 5"
+    kind: personnel
+    start: f1-r07
+    path: [f0-r08, f1-r01]
+    speedMps: 1.2
+    dwellS: 25
+    loop: true
+  - mac: "CC:11:00:00:01:06"
+    profile: bc011
+    tagType: PERSONNEL
+    label: "Calib badge 6"
+    kind: personnel
+    start: f0-r06
+    path: [f1-r05, f0-r01, f1-r08]
+    speedMps: 1.3
+    dwellS: 20
+    loop: true
