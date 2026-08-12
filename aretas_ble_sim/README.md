@@ -57,8 +57,12 @@ override with `--location-name` / `--location-id`), one device per simulated
 receiver, **the building's floor plans as registered building maps with every
 receiver placed on them** (this is what makes tags render as positioned chips
 with uncertainty circles instead of presence-only markers — `--skip-placement`
-opts out), and the scenario's tags. Newly registered tags enter the ingest
-allowlist within about a minute.
+opts out), and the scenario's tags — homed at that location (the platform
+requires a home location per tag: receivers only accept tags registered to
+their own site, so a tag homed elsewhere won't be heard here). Re-running
+also assigns the home to any of the scenario's tags registered before the
+platform required one. Newly registered tags enter the ingest allowlist
+within about a minute.
 
 ## Sample scenarios
 

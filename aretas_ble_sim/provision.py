@@ -331,7 +331,9 @@ def main(argv: list[str] | None = None) -> int:
         place_failures += place_receivers(
             api, headers, location, scenario, maps_by_floor)
 
-    tag_failures = register_scenario_tags(api, headers, scenario)
+    # tags are homed at the location we just ensured — receivers only accept
+    # tags registered to their own site
+    tag_failures = register_scenario_tags(api, headers, scenario, location["id"])
 
     log.info("Provisioning done: %d receiver failures, %d placement "
              "failures, %d tag failures (location '%s')", dev_failures,
