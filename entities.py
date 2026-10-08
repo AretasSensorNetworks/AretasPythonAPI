@@ -18,6 +18,23 @@ class AlertHistoryRecord(BaseModel):
     isResolved: bool
 
 
+class AlertLogRecord(BaseModel):
+    """
+    A persistent alert event log record (the alertlog/* endpoints).
+    This differs from AlertHistoryRecord, which models the recent-history cache:
+    timestamp is the reading that opened the incident, rtnTimestamp is 0 until the
+    return-to-normal reading arrives, and isActive is True while the incident is open.
+    """
+    eventId: int
+    mac: int
+    timestamp: int
+    rtnTimestamp: int = 0
+    type: int
+    data: float
+    alertId: str
+    isActive: bool = False
+
+
 class Alert(BaseModel):
     name: Optional[str] = None
     id: str

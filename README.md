@@ -21,12 +21,16 @@ A Python client library for interacting with the Aretas IoT REST API. The librar
 13. [Labelled Data Query](#labelled-data-query--labelleddataquery)
 14. [Alert Management](#alert-management--alertservice)
 15. [Alert History](#alert-history--alerthistoryservice)
-16. [Probability & Statistics](#probability--statistics--probabilityserviceapiclient)
-17. [Geocoding](#geocoding--geocodingapiclient)
-18. [IP Utilities](#ip-utilities--iputilapiclient)
-19. [Timezone Lookup](#timezone-lookup--timezoneapiclient)
-20. [Utilities](#utilities--utils)
-21. [Entities / Data Models](#entities--data-models)
+16. [Alert Log](#alert-log--alertlogservice)
+17. [Site Locations](#site-locations--sitelocationservice)
+18. [Devices](#devices--deviceservice)
+19. [Alert Tester](#alert-tester--alert_testerpy)
+20. [Probability & Statistics](#probability--statistics--probabilityserviceapiclient)
+21. [Geocoding](#geocoding--geocodingapiclient)
+22. [IP Utilities](#ip-utilities--iputilapiclient)
+23. [Timezone Lookup](#timezone-lookup--timezoneapiclient)
+24. [Utilities](#utilities--utils)
+25. [Entities / Data Models](#entities--data-models)
 
 ---
 
@@ -34,10 +38,10 @@ A Python client library for interacting with the Aretas IoT REST API. The librar
 
 All modules require an `APIConfig` object which reads credentials from an INI file.
 
-By default `APIConfig()` looks for `config.ini` in the current working directory. Pass an explicit path when needed:
+By default `APIConfig()` looks for `config.cfg` in the current working directory. Pass an explicit path when needed:
 
 ```python
-config = APIConfig()                        # looks for ./config.ini
+config = APIConfig()                        # looks for ./config.cfg
 config = APIConfig('path/to/config.ini')    # explicit path
 ```
 
@@ -230,16 +234,21 @@ from utils import Utils
 ingest = SensorDataIngest(auth)
 
 # Single datum
-datum = {'mac': 123456789, 'type': 246, 'data': 450.0, 'timestamp': Utils.now_ms()}
+datum = {'mac': 123456789, 'type': 181, 'data': 450.0, 'timestamp': Utils.now_ms()}
 success = ingest.send_datum(datum, overwritetimestamp=False)          # -> bool
+
+# Same call, but keep the API's reply so rejections can be told apart
+# ("not authorized" = unknown MAC, "data exceeds allowed range!" = out-of-range value, ...)
+result = ingest.send_datum_ws(datum, overwritetimestamp=False)        # -> WebServiceBoolean
+print(result.get_boolean_response(), result.get_message())
 
 # With automatic token refresh and retry
 success = ingest.send_datum_auth_check(datum, overwritetimestamp=False, n_retries=3)
 
 # Batch send
 dataset = [
-    {'mac': 123456789, 'type': 246, 'data': 450.0, 'timestamp': Utils.now_ms()},
-    {'mac': 123456789, 'type': 248, 'data': 22.5,  'timestamp': Utils.now_ms()},
+    {'mac': 123456789, 'type': 181, 'data': 450.0, 'timestamp': Utils.now_ms()},
+    {'mac': 123456789, 'type': 246, 'data': 22.5,  'timestamp': Utils.now_ms()},
 ]
 success = ingest.send_data(dataset, auth_check=True)   # auth_check retries on 401
 ```
@@ -266,7 +275,7 @@ image_bytes = sdci.get_chart_image(
     mac=123456789,
     begin=AUtils.now_ms() - 2 * 60 * 60 * 1000,   # last 2 hours
     end=AUtils.now_ms(),
-    types=[246, 248],   # CO2 + temperature
+    types=[181, 246],   # CO2 + temperature
     width=1024,
     height=768
 )
@@ -298,8 +307,8 @@ meta = sti.get_sensor_type_metadata(246)   # -> dict
 # e.g. {'label': 'CO2', 'units': 'ppm', 'color': '#...', ...}
 
 # Human-readable "Label units" strings for a list of types
-labels = sti.get_labels([246, 248, 181])
-# -> ['CO2 ppm', 'Temperature C', 'TVOC ppb']
+labels = sti.get_labels([181, 246, 248])
+# -> ["Carbon Dioxide ppm", "Temperature °C", "Relative Humidity %"]
 
 # Refresh the cache
 sti.refresh_sensor_type_into()
@@ -398,7 +407,7 @@ for dc in classifiers:
 dc = DataClassifier()
 dc.set_label("Occupied")
 dc.set_description("Room occupancy model")
-dc.set_required_types([246, 248, 181])    # CO2, Temperature, TVOC
+dc.set_required_types([181, 246, 248])    # CO2, Temperature, Relative Humidity
 result = crud.create(dc)   # -> WebServiceBoolean
 
 # Update / delete
@@ -505,7 +514,7 @@ alert = Alert(
     owner=my_client_id,                 # your account UUID
     name="High CO2",
     description="Alert when CO2 exceeds 1000 ppm",
-    sensorType=246,                     # CO2
+    sensorType=181,                     # CO2 (ppm)
     sensorMacs="123456789",
     thresholdA=1000.0,
     thresholdAType=True,                # True = ceiling (trigger above threshold)
@@ -574,6 +583,132 @@ history_svc.dismiss_alert_history_object(
 ```
 
 → See [`examples/alert_history_service_test.py`](examples/alert_history_service_test.py)
+
+---
+
+## Alert Log — `alert_log_service.py`
+
+**Class:** `AlertLogService`
+
+Reads and purges the **persistent** alert event log. Every incident the alert engine opens is written here as an `AlertLogRecord` and closed in place when the return-to-normal reading arrives — this is the durable record behind the alert-log pages, whereas `AlertHistoryService` reads the short-lived recent-history cache. Windows are epoch ms and apply to the record's `timestamp` (the reading that opened the incident).
+
+```python
+from alert_log_service import AlertLogService
+
+alog = AlertLogService(auth)
+
+# Incidents for one alert in a window (ascending). `limit` is always sent — the API returns
+# nothing when it is omitted.
+records = alog.list_by_alert_id(alert_id, start_ms, end_ms, limit=1000)   # -> List[AlertLogRecord] | None
+for r in records:
+    print(r.eventId, r.mac, r.type, r.data, r.timestamp, r.isActive, r.rtnTimestamp)
+
+# Incidents for one device (newest first)
+records = alog.list_by_mac(mac=123456789, start=start_ms, end=end_ms)
+
+# Everything in the account for a window of at most 8 days (newest first)
+records = alog.list_account_history(start_ms, end_ms)
+
+# One record by event id
+rec = alog.get_by_event_id(event_id)                                      # -> AlertLogRecord | None
+
+# Delete an alert's records: age_ms=0 purges them all, otherwise only those older than age_ms
+removed = alog.purge(alert_id, age_ms=0)                                  # -> int | None
+```
+
+`AlertLogRecord` fields: `eventId`, `mac`, `timestamp`, `rtnTimestamp` (0 while the incident is open), `type`, `data`, `alertId`, `isActive`.
+
+→ Used by [`alert_tester.py`](alert_tester.py)
+
+---
+
+## Site Locations — `site_location_service.py`
+
+**Class:** `SiteLocationService`
+
+Create, list, update and delete site locations (buildings / sites). A device's `owner` is the id of its site location. The API does not return the id of a newly created location, so `create()` is normally followed by `find_by_description()`.
+
+```python
+from site_location_service import SiteLocationService
+
+sites = SiteLocationService(auth)
+
+body = SiteLocationService.build(owner=my_client_id, description="Head Office",
+                                 lat=49.28, lon=-123.12, timezone="America/Vancouver")
+sites.create(body)                                        # -> WebServiceBoolean
+location = sites.find_by_description(my_client_id, "Head Office")   # -> dict | None
+
+locations = sites.list(my_client_id)                      # -> List[dict] | None
+
+location['description'] = "Head Office (2nd floor)"
+sites.update(location)                                    # -> WebServiceBoolean
+
+# WARNING: deleting a location also deletes every device and building map it contains
+sites.delete(location)                                    # -> WebServiceBoolean
+```
+
+The `timezone` (an IANA id) is what the alert engine uses to evaluate time-windowed (threshold B) alert rules for devices at that location.
+
+---
+
+## Devices — `device_service.py`
+
+**Class:** `DeviceService`
+
+Create, list, update and remove devices (the API calls them *sensor locations*). MACs are decimal integers and unique platform-wide: creating a device with a MAC that already exists fails with the API's duplicate-MAC message. The API does not return the id of a newly created device, so `create()` is normally followed by `find_by_mac()`.
+
+```python
+from device_service import DeviceService
+
+devices = DeviceService(auth)
+
+body = DeviceService.build(owner=location['id'], mac=123456789, description="Boardroom",
+                           lat=location['lat'], lon=location['lon'],
+                           notify_if_down=True, down_interval_ms=2 * 3600 * 1000)
+result = devices.create(body)                             # -> WebServiceBoolean
+device = devices.find_by_mac(location['id'], 123456789)   # -> dict | None
+
+all_devices = devices.list(location['id'])                # -> List[dict] | None
+
+device['description'] = "Boardroom (east)"
+devices.update(device)                                    # -> WebServiceBoolean
+
+devices.remove(device)                                    # -> WebServiceBoolean
+```
+
+A newly created MAC is accepted by the data ingest only after the platform's periodic refresh of its known-device list (typically within a few minutes) — until then `ingest/…` replies `not authorized`. `SensorDataIngest.send_datum_ws` exposes that reply.
+
+---
+
+## Alert Tester — `alert_tester.py`
+
+An end-to-end check that the alerting pipeline works, from a device's reading to an alert incident record. It creates a throwaway site location and a simulated device (random fake MAC), creates a ceiling-threshold alert on it with notifications disabled, behaves like a device for a few minutes — normal readings at a device-like cadence, then readings above the threshold, then normal again — and verifies that an incident was opened (persistent alert log + recent-history cache) and then resolved. Whether it passes, fails or is interrupted, it removes the alert, its log records, the device and the location it created.
+
+```bash
+python alert_tester.py --config config.ini
+python alert_tester.py --config config.ini --type 181 --normal 450 --threshold 1000 --exceed 1500
+python alert_tester.py --config config.ini --interval 90 --normal-count 2
+python alert_tester.py --config config.ini --duration-trigger 120000     # 2-minute hold time
+python alert_tester.py --config config.ini --location-id <existing-location-id>
+python alert_tester.py --config config.ini --email you@example.com      # also send ONE real notification
+python alert_tester.py --config config.ini --report report-alert-test.json
+```
+
+| Option | Default | Meaning |
+|---|---|---|
+| `--type` | 181 (CO2 ppm) | sensor type to alert on; values are checked against the type's ingest range before anything is created |
+| `--normal` / `--threshold` / `--exceed` | 450 / 1000 / 1500 | reading levels; must satisfy normal ≤ threshold < exceed |
+| `--interval` | 60 s | seconds between readings (a real device's cadence) |
+| `--normal-count` / `--exceed-count` | 3 / 2 | readings per phase; the exceeding count is raised automatically to cover the hold time |
+| `--duration-trigger` | 0 | alert hold time in ms; the report flags an incident that opens sooner than the hold allows |
+| `--location-id` | create a throwaway one | put the simulated device in an existing location (that location is never deleted) |
+| `--email` | off | send one real notification; by default `maxNumAlerts=0` records the incident without notifying anyone |
+| `--auth-wait` / `--cache-wait` | 420 s / 75 s | how long to wait for the ingest to accept the new MAC / for the alert engine to load the new alert |
+| `--fire-timeout` / `--rtn-timeout` | 180 s / 180 s | how long to wait for the incident to open / to resolve |
+| `--keep-history` | off | leave the alert's log records in place |
+| `--report` | none | write the full JSON report (readings sent, records seen, cleanup results) |
+
+Exit codes: `0` the alert fired and returned to normal, `1` it did not fire or did not resolve, `2` setup problem (credentials, out-of-range values, a create call failed). A run takes roughly 6–12 minutes, most of it waiting for the platform's periodic device-list refresh and for readings paced at `--interval`.
 
 ---
 
@@ -775,6 +910,7 @@ Other notable models:
 | `SensorBit` | Minimal sensor reading used in some cache responses |
 | `Alert` | Pydantic model for alert definitions (see [Alert Management](#alert-management--alertservice)) |
 | `AlertHistoryRecord` | Pydantic model for alert events |
+| `AlertLogRecord` | Pydantic model for persistent alert log incidents (see [Alert Log](#alert-log--alertlogservice)) |
 | `Point` | 3-D coordinate (`x`, `y`, `z`) used for building map overlays |
 | `BasicRectangle` | Axis-aligned bounding box |
 | `LocationTag` | Tag attached to a location |

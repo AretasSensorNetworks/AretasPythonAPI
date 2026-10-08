@@ -2,6 +2,7 @@ import logging
 
 from auth import APIAuth
 from utils import Utils as AUtils
+from entities import WebServiceBoolean
 import requests
 from requests.models import PreparedRequest
 import json
@@ -74,10 +75,16 @@ class SensorDataIngest:
             self.logger.error("Could not send datum to API. Invalid response code:{}".format(response.status_code))
             return False
 
-    def send_datum(self, datum: dict, overwritetimestamp: bool = True) -> bool:
+    def send_datum_ws(self, datum: dict, overwritetimestamp: bool = True) -> WebServiceBoolean:
         """
-        Send a datum if you know you have a valid auth token and/or are manually
-        managing token refresh
+        Send a datum and return the API's full {booleanResponse, message} reply.
+        The message distinguishes the rejection reasons ("not authorized" for a MAC the
+        platform does not know yet, "data exceeds allowed range!" for an out-of-range value, ...)
+        that send_datum() collapses into False.
+
+        :param datum: { 'mac': 1234, 'type': 123, 'data': 0.00, 'timestamp': 1234567 }
+        :param overwritetimestamp: when True (default) the datum's timestamp is replaced with the current time
+        :return: WebServiceBoolean
         """
         ts = AUtils.now_ms()
 
@@ -99,19 +106,24 @@ class SensorDataIngest:
         req = PreparedRequest()
         req.prepare_url(url, params)
 
-        headers = {"Authorization": "Bearer " + self.api_auth.get_token(), "X-AIR-Token": str(mac)}
+        headers = {"Authorization": "Bearer " + (self.api_auth.get_token() or ""), "X-AIR-Token": str(mac)}
 
         response = requests.get(req.url, headers=headers)
 
         if response.status_code == 200:
-
             json_response = json.loads(response.content.decode())
             self.logger.info("API Response:{0}".format(json_response))
-            return json_response['booleanResponse']
+            return AUtils.unmarshall_webservice_bool(json_response)
 
-        else:
-            self.logger.error("Invalid response code:{0}".format(response.status_code))
-            return False
+        self.logger.error("Invalid response code:{0}".format(response.status_code))
+        return WebServiceBoolean(False, "HTTP {}".format(response.status_code))
+
+    def send_datum(self, datum: dict, overwritetimestamp: bool = True) -> bool:
+        """
+        Send a datum if you know you have a valid auth token and/or are manually
+        managing token refresh
+        """
+        return self.send_datum_ws(datum, overwritetimestamp).get_boolean_response()
 
     def send_data(self, data: list[dict], auth_check = False) -> bool:
         """
